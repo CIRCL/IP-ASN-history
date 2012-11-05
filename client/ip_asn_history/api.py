@@ -28,11 +28,6 @@ default_announce_date = None
 routing_db = None
 keys = []
 
-netmasks = ['30', '29', '28', '27', '26', '25', '24', '23',
-            '22', '21', '20', '19', '18', '17', '16', '15',
-            '14', '13', '12', '11', '10', '9', '8', '7', '6',
-            '5', '4', '3', '2', '1', '0']
-
 def prepare():
     global routing_db
     global ready
@@ -49,8 +44,8 @@ def prepare_keys(ip):
     global keys
     _ip = struct.unpack('!I', socket.inet_aton(ip))[0]
     keys = [ '/'.join([socket.inet_ntop(socket.AF_INET,
-                struct.pack('!I', IPy.IP('/'.join([hex(_ip), nm]),
-                    make_net = True).int())), nm]) for nm in netmasks]
+                struct.pack('!I', IPy.IP('/'.join([hex(_ip), str(mask)]),
+                    make_net = True).int())), str(mask)]) for mask in reversed(range(31))]
     keys.insert(0, ip +'/32')
 
 def run(announce_date = None):
