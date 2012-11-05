@@ -3,7 +3,7 @@ IP-ASN-history
 
 IP-ASN-history is a tool to lookup the ASN which announce an IP over the time.
 
-0.  Prerequired
+1.  Prerequired
 
     * Redis server
     * Binaries:
@@ -13,7 +13,7 @@ IP-ASN-history is a tool to lookup the ASN which announce an IP over the time.
         - pubsublogger: https://github.com/Rafiot/PubSubLogger
         - logbook: http://packages.python.org/Logbook/ (only if you want to log)
 
-1.  Populate the database
+2.  Populate the database
 
     You can import all the dumps in bgpdump format but the source is not saved in
     the database. The best way to import announcement of ifferent soures is to use
@@ -28,7 +28,7 @@ IP-ASN-history is a tool to lookup the ASN which announce an IP over the time.
     Optional: Run ./start_logging.sh if you want to log the import.
     The logfiles will be in server/logs/
 
-2.  Query the database
+3.  Query the database
 
     Have a look at client/
 
