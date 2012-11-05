@@ -18,9 +18,12 @@ if __name__ == '__main__':
         if not len(line) > 0:
             continue
         splitted = line.split()
+        date = None
         if len(splitted) > 1:
             ip, date = splitted
         else:
-            ip, date = [line, ip2asn.default_announce_date]
+            ip = line
         ip2asn.prepare_keys(ip)
-        print ip, ip2asn.asn_date(date), date
+        if date is None:
+            date = ip2asn.default_announce_date
+        print ip, ip2asn.asn(date), date
