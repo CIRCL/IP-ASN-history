@@ -1,7 +1,10 @@
 IP-ASN-history
 ==============
 
-IP-ASN-history is a tool to query an IP address to get the ASN history of the announce.
+IP-ASN-history is a server software to store efficiently the history 
+of BGP announces and quickly lookup IP addresses origins. The server
+is supporting bgpdump format for importing BGP announces (e.g. from RIPE RIS dump
+or your own openbgpd dump file).
 
 1.  Prerequired
 
@@ -46,3 +49,8 @@ IP-ASN-history is a tool to query an IP address to get the ASN history of the an
     cd client
     python setup.py install
     ```
+
+License
+-------
+
+IP-ASN-history is licensed under the GNU Affero License version 3 or upper.
