@@ -6,15 +6,16 @@ IP-ASN-history is a tool to query an IP address to get the ASN history of the an
 1.  Prerequired
 
     You will need this:
-        * Redis server with unix socket enabled
-        * Binaries:
-            - get the latest bgpdump from http://www.ris.ripe.net/source/bgpdump/
-            - build it and copy bgpdump in server/bin/
-        * Python libraries:
-            - redis-py: https://github.com/andymccurdy/redis-py/
-            - IPy: https://github.com/haypo/python-ipy
-            - pubsublogger: https://github.com/Rafiot/PubSubLogger
-            - logbook: http://packages.python.org/Logbook/ (only if you want to log)
+
+    * Redis server with unix socket enabled
+    * Binaries:
+        - get the latest bgpdump from http://www.ris.ripe.net/source/bgpdump/
+        - build it and copy bgpdump in server/bin/
+    * Python libraries:
+        - redis-py: https://github.com/andymccurdy/redis-py/
+        - IPy: https://github.com/haypo/python-ipy
+        - pubsublogger: https://github.com/Rafiot/PubSubLogger
+        - logbook: http://packages.python.org/Logbook/ (only if you want to log)
 
 2.  Populate the database
 
