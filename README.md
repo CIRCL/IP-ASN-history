@@ -22,8 +22,8 @@ or your own openbgpd dump file).
 
 2.  Populate the database
 
-    You can import all the dumps in bgpdump format but the source is not saved in
-    the database. The best way to import announcement of ifferent soures is to use
+    You can import all the dumps in bgpdump format but the original is not saved in
+    the database. The best way to import announcement of different sources is to use
     different redis databases.
 
     ```bash
@@ -34,14 +34,26 @@ or your own openbgpd dump file).
 
     Note: fetch_historical_bviews.py and db_generator.py are services, do not start them in a cron.
 
-    Optional: Run ./start_logging.sh if you want to log the import.
-    The logfiles will be in server/logs/
+    Optional: Run ./start_logging.sh if you want to log the import process.
+    
+    The log files are located in the server/logs/ directory.
 
 3.  Query the database
 
-    Have a look at client/
+    Client software is located in the directory client.
 
     Change the IP and the port in ip_asn_history/api.py if necessary.
+    
+    You can query any IP addresses to get the full history:
+    
+    ```bash
+    cd client
+    python ip2asn_fullhistory -i 8.8.8.8
+    20121104 15169 8.8.8.0/24
+    20121103 15169 8.8.8.0/24
+    20121102 15169 8.8.8.0/24
+    20121101 15169 8.8.8.0/24
+    ```
 
     To install the library system-wide:
 
