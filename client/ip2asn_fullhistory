@@ -9,10 +9,16 @@ from ip_asn_history import api as ip2asn
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Get all the assignations of an IP.')
-    parser.add_argument("-i", "--ip", required=True, type=str, help='IP address [127.0.0.1].')
+    parser.add_argument("-i", "--ip", required=True, type=str,
+            help='IP address [127.0.0.1].')
+    parser.add_argument("-d", "--debug", action="store_true",
+            help='Enable debug mode (raise an exception if an IP is invalid).')
     args = parser.parse_args()
 
     ip = args.ip.strip()
+
+    if args.debug:
+        ip2asn.skip_exception = False
 
     ip2asn.prepare_keys(ip)
     for entry in ip2asn.history():

@@ -63,6 +63,10 @@ or your own openbgpd dump file).
     python setup.py install
     ```
 
+    Note: By default, if the IP is invalid, it is simply skipped. If you want
+    to see the exceptions, enable the debug flag (-d) or set the variable
+    "skip_exception" to False in the API.
+
 License
 -------
 

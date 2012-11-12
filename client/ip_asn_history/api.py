@@ -13,13 +13,13 @@ import redis
 import struct
 import socket
 
+use_unix_socket = True
+
+hostname = '127.0.0.1'
+port = 6379
 redis_db = 0
 
-redis_use_socket = True
-
-redis_host = '127.0.0.1'
-redis_port = 6379
-
+skip_exception = True
 
 ip = None
 ready = False
@@ -32,10 +32,10 @@ def prepare():
     global routing_db
     global ready
     global default_announce_date
-    if redis_use_socket:
+    if use_unix_socket:
         routing_db = redis.Redis(unix_socket_path='/tmp/redis.sock', db=redis_db)
     else:
-        routing_db = redis.Redis(port=redis_port, db=redis_db)
+        routing_db = redis.Redis(host = hostname, port=port, db=redis_db)
     default_announce_date = sorted(routing_db.smembers('imported_dates'), reverse = True)[0]
     ready = True
 
@@ -44,11 +44,17 @@ def prepare_keys(ip):
     global keys
     if not ready:
         prepare()
-    _ip = struct.unpack('!I', socket.inet_aton(ip))[0]
-    keys = [ '/'.join([socket.inet_ntop(socket.AF_INET,
-                struct.pack('!I', IPy.IP('/'.join([hex(_ip), str(mask)]),
-                    make_net = True).int())), str(mask)]) for mask in reversed(range(31))]
-    keys.insert(0, ip +'/32')
+    try:
+        _ip = struct.unpack('!I', socket.inet_aton(ip))[0]
+        keys = [ '/'.join([socket.inet_ntop(socket.AF_INET,
+                    struct.pack('!I', IPy.IP('/'.join([hex(_ip), str(mask)]),
+                        make_net = True).int())), str(mask)])
+                    for mask in reversed(range(31))]
+        keys.insert(0, ip +'/32')
+    except Exception as e:
+        keys = []
+        if not skip_exception:
+            raise e
 
 def run(announce_date = None):
     p = routing_db.pipeline(False)
