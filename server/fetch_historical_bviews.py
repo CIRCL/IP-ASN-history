@@ -44,16 +44,12 @@ import urllib
 import argparse
 import time
 
-import httplib
-from urlparse import urlparse
-
 from pubsublogger import publisher
 import constraints as c
 
 # Format: YYYY-MM-DD
 interval_first = None
 interval_last = None
-url_list = []
 
 base_url = 'http://data.ris.ripe.net/rrc00/{year_month}/bview.{file_day}.0000.gz'
 filename = 'bview.{day}.gz'
@@ -69,32 +65,22 @@ def check_dirs():
     if not os.path.exists(old_dir):
         os.mkdir(old_dir)
 
-def checkURL(url):
-    """
-        Check if the URL exists by getting the header of the response.
-    """
-    p = urlparse(url)
-    h = httplib.HTTPConnection(p[1])
-    h.request('HEAD', p[2])
-    reply = h.getresponse()
-    h.close()
-    if reply.status == 200:
-        return True
-    else:
-        publisher.info(url + ' does not exists.')
-        return False
-
 def downloadURL(url, filename):
     """
         Inconditianilly download the URL in a temporary directory.
         When finished, the file is moved in the real directory.
         Like this an other process will not attempt to extract an inclomplete file.
     """
-    path_temp_bviewfile = os.path.join(c.bview_dir, 'tmp', filename)
-    path_bviewfile = os.path.join(c.bview_dir, filename)
-    urllib.urlretrieve(url, os.path.join(c.raw_data, path_temp_bviewfile))
-    os.rename(os.path.join(c.raw_data, path_temp_bviewfile),
-            os.path.join(c.raw_data, path_bviewfile))
+    path_temp_bviewfile = os.path.join(c.raw_data, c.bview_dir, 'tmp', filename)
+    path_bviewfile = os.path.join(c.raw_data, c.bview_dir, filename)
+    f = urllib.urlopen(url)
+    if f.getcode() != 200:
+        publisher.warning('{} unavailable, code: {}'.format(url, f.getcode()))
+        return False
+    with open(path_temp_bviewfile, 'w') as outfile:
+        outfile.write(f.read())
+    os.rename(path_temp_bviewfile, path_bviewfile)
+    return True
 
 def already_downloaded(filename):
     """
@@ -112,17 +98,18 @@ def to_download():
         We always get the first file of the next day.
         Ex: 2013-01-01 => 2013-01-02.0000
     """
-    global url_list
     first_day = parse(interval_first)
     last_day = parse(interval_last)
     one_day = datetime.timedelta(1)
     cur_day = first_day
+    url_list = []
     while cur_day < last_day:
         fname = filename.format(day = cur_day.strftime("%Y%m%d"))
         cur_day += one_day
         url = base_url.format(year_month = cur_day.strftime("%Y.%m"),
                 file_day = cur_day.strftime("%Y%m%d"))
         url_list.append((fname, url))
+    return sorted(url_list, key=lambda tup: tup[0], reverse=True)
 
 
 if __name__ == '__main__':
@@ -132,9 +119,9 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Fetch all the bview files of an interval.')
     parser.add_argument("-f", "--firstdate", required=True, type=str,
-            help='First date of the interval [YYYYMMDD].')
+            help='First date of the interval [YYYY-MM-DD].')
     parser.add_argument("-l", "--lastdate", type=str, default=None,
-            help='Last date of the interval [YYYYMMDD].')
+            help='Last date of the interval [YYYY-MM-DD].')
 
     args = parser.parse_args()
     interval_first = args.firstdate
@@ -144,25 +131,20 @@ if __name__ == '__main__':
     else:
         daemon = False
 
-
+    unavailable = []
     while 1:
         got_new_files = False
         if daemon or interval_last is None:
             interval_last = datetime.date.today().strftime("%Y-%m-%d")
 
-        to_download()
-        url_list = sorted(url_list, key=lambda tup: tup[0], reverse=True)
-        for fname, url in url_list:
-            try:
-                if checkURL(url):
-                    if not already_downloaded(fname):
-                        got_new_files = True
-                        publisher.info("Downloading bview file: " + url)
-                        downloadURL(url, fname)
-                        publisher.info("Downloaded:" + fname)
-            except:
-                publisher.warning('Networking error, trying again asap.')
-                time.sleep(60)
+        for fname, url in to_download():
+            if not already_downloaded(fname) and url not in unavailable:
+                got_new_files = True
+                publisher.debug("Trying to download: " + url)
+                if downloadURL(url, fname):
+                    publisher.info("Downloaded:" + fname)
+                else:
+                    unavailable.append(url)
         if not got_new_files:
             publisher.info('No new files to download.')
             if not daemon:
