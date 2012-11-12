@@ -36,7 +36,8 @@ def db_import(filename, day):
                     block = parsed[0].strip()
                     # RIPE-NCC-RIS BGP IPv6 Anchor Prefix @RRC00
                     # RIPE-NCC-RIS BGP Anchor Prefix @ rrc00 - RIPE NCC
-                    if block in ['2001:7fb:ff00::/48', '84.205.80.0/24']:
+                    if block in ['2001:7fb:ff00::/48', '84.205.80.0/24',
+                            '2001:7fb:fe00::/48', '84.205.64.0/24']:
                         asn = 12654
                     else:
                         asn = int(parsed[1].split()[-1].strip())
@@ -58,6 +59,7 @@ def db_import(filename, day):
 if __name__ == '__main__':
 
     publisher.channel = 'bviewparse'
+    publisher.use_tcp_socket = False
 
     parser = argparse.ArgumentParser(description='Parse a bview file.')
     parser.add_argument("-f", "--filename", required=True, type=str,

@@ -18,7 +18,7 @@ import file_splitter
 from pubsublogger import publisher
 
 
-simultaneous_db_import = 5
+simultaneous_db_import = 10
 path_to_importer = os.path.join(os.curdir, 'file_import.py')
 
 path_output_bviewfile = os.path.join(c.bview_dir, 'bview')
@@ -118,6 +118,7 @@ def import_assignations(files):
 if __name__ == '__main__':
 
     publisher.channel = 'bview'
+    publisher.use_tcp_socket = False
 
     bgpdump = os.path.join(c.raw_data, path_to_bgpdump_bin)
 
@@ -130,7 +131,7 @@ if __name__ == '__main__':
         got_new_files = False
         files = glob.glob(os.path.join(c.bview_dir, 'bview.*.gz'))
         while len(files) > 0:
-            files = sorted(files, reverse=True)
+            files = sorted(files)
             f = files.pop()
             imported_day = os.path.basename(f).split('.')[1]
             if routing_db.sismember('imported_dates', imported_day):

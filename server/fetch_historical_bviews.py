@@ -78,8 +78,11 @@ def checkURL(url):
     h.request('HEAD', p[2])
     reply = h.getresponse()
     h.close()
-    if reply.status == 200 : return 1
-    else: return 0
+    if reply.status == 200:
+        return True
+    else:
+        publisher.info(url + ' does not exists.')
+        return False
 
 def downloadURL(url, filename):
     """
@@ -125,12 +128,13 @@ def to_download():
 if __name__ == '__main__':
     check_dirs()
     publisher.channel = 'bviewfetch'
+    publisher.use_tcp_socket = False
 
     parser = argparse.ArgumentParser(description='Fetch all the bview files of an interval.')
     parser.add_argument("-f", "--firstdate", required=True, type=str,
-            help='First date of the interval [YYYY-MM-DD].')
+            help='First date of the interval [YYYYMMDD].')
     parser.add_argument("-l", "--lastdate", type=str, default=None,
-            help='Last date of the interval [YYYY-MM-DD].')
+            help='Last date of the interval [YYYYMMDD].')
 
     args = parser.parse_args()
     interval_first = args.firstdate
@@ -143,7 +147,7 @@ if __name__ == '__main__':
 
     while 1:
         got_new_files = False
-        if interval_last is None:
+        if daemon or interval_last is None:
             interval_last = datetime.date.today().strftime("%Y-%m-%d")
 
         to_download()
@@ -165,4 +169,3 @@ if __name__ == '__main__':
                 publisher.info('Exiting...')
                 break
             time.sleep(3600)
-            interval_last = None

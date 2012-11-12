@@ -39,6 +39,8 @@ def fsplit(file_to_split):
 
             # find the next separator or EOF
             s = f.readline()
+            if len(s) == 0:
+                s = f.readline()
             while len(s) != 0 and s != separator:
                 s = f.readline()
 
