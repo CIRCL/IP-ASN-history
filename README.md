@@ -1,7 +1,7 @@
 IP-ASN-history
 ==============
 
-IP-ASN-history is a server software to store efficiently the history 
+IP-ASN-history is a server software to store efficiently the history
 of BGP announces and quickly lookup IP addresses origins. The server
 is supporting bgpdump format for importing BGP announces (e.g. from RIPE RIS dump
 or your own openbgpd dump file).
@@ -16,6 +16,7 @@ or your own openbgpd dump file).
         - build it and copy bgpdump in server/bin/
     * Python libraries:
         - redis-py: https://github.com/andymccurdy/redis-py/
+        - dateutil: https://launchpad.net/dateutil
         - IPy: https://github.com/haypo/python-ipy
         - pubsublogger: https://github.com/Rafiot/PubSubLogger
         - logbook: http://packages.python.org/Logbook/ (only if you want to log)
@@ -35,7 +36,7 @@ or your own openbgpd dump file).
     Note: fetch_historical_bviews.py and db_generator.py are services, do not start them in a cron.
 
     Optional: Run ./start_logging.sh if you want to log the import process.
-    
+
     The log files are located in the server/logs/ directory.
 
 3.  Query the database
@@ -43,9 +44,9 @@ or your own openbgpd dump file).
     Client software is located in the directory client.
 
     Change the IP and the port in ip_asn_history/api.py if necessary.
-    
+
     You can query any IP addresses to get the full history:
-    
+
     ```bash
     cd client
     python ip2asn_fullhistory -i 8.8.8.8
