@@ -139,11 +139,12 @@ if __name__ == '__main__':
 
         for fname, url in to_download():
             if not already_downloaded(fname) and url not in unavailable:
-                got_new_files = True
                 publisher.debug("Trying to download: " + url)
                 if downloadURL(url, fname):
+                    got_new_files = True
                     publisher.info("Downloaded:" + fname)
-                else:
+                elif interval_last != datetime.date.today().strftime("%Y-%m-%d"):
+                    # if today's file is not available, try again later.
                     unavailable.append(url)
         if not got_new_files:
             publisher.info('No new files to download.')
