@@ -7,11 +7,13 @@
 #       the default value is the last imported day
 # The output of the script is: 127.0.0.1 3303 20130101
 
-
-import IPy
 import redis
-import struct
-import socket
+import itertools
+import sys
+
+if  sys.version_info[0] == 3:
+    # itertools.izip does not exists in python 3 and is much faster in python 2
+    itertools.izip = zip
 
 use_unix_socket = True
 
@@ -21,12 +23,43 @@ redis_db = 0
 
 skip_exception = True
 
-ip = None
 ready = False
 default_announce_date = None
 
 routing_db = None
 keys = []
+
+netmasks = [ [128, 0, 0, 0],
+             [192, 0, 0, 0],
+             [224, 0, 0, 0],
+             [240, 0, 0, 0],
+             [248, 0, 0, 0],
+             [252, 0, 0, 0],
+             [254, 0, 0, 0],
+             [255, 0, 0, 0],
+             [255, 128, 0, 0],
+             [255, 192, 0, 0],
+             [255, 224, 0, 0],
+             [255, 240, 0, 0],
+             [255, 248, 0, 0],
+             [255, 252, 0, 0],
+             [255, 254, 0, 0],
+             [255, 255, 0, 0],
+             [255, 255, 128, 0],
+             [255, 255, 192, 0],
+             [255, 255, 224, 0],
+             [255, 255, 240, 0],
+             [255, 255, 248, 0],
+             [255, 255, 252, 0],
+             [255, 255, 254, 0],
+             [255, 255, 255, 0],
+             [255, 255, 255, 128],
+             [255, 255, 255, 192],
+             [255, 255, 255, 224],
+             [255, 255, 255, 240],
+             [255, 255, 255, 248],
+             [255, 255, 255, 252]]
+
 
 def prepare():
     global routing_db
@@ -36,21 +69,20 @@ def prepare():
         routing_db = redis.Redis(unix_socket_path='/tmp/redis.sock', db=redis_db)
     else:
         routing_db = redis.Redis(host = hostname, port=port, db=redis_db)
-    default_announce_date = sorted(routing_db.smembers('imported_dates'), reverse = True)[0]
+    default_announce_date = sorted(routing_db.smembers('imported_dates'),
+            reverse = True)[0]
     ready = True
-
 
 def prepare_keys(ip):
     global keys
     if not ready:
         prepare()
     try:
-        _ip = struct.unpack('!I', socket.inet_aton(ip))[0]
-        keys = [ '/'.join([socket.inet_ntop(socket.AF_INET,
-                    struct.pack('!I', IPy.IP('/'.join([hex(_ip), str(mask)]),
-                        make_net = True).int())), str(mask)])
-                    for mask in reversed(range(31))]
-        keys.insert(0, ip +'/32')
+        keys = [ip +'/32']
+        ip_split = [int(digit) for digit in ip.split('.')]
+        for mask in reversed(list(range(30))):
+            tmpip = [str(a & b) for a, b in itertools.izip(ip_split, netmasks[mask])]
+            keys.append('.'.join(tmpip) + '/' + str(mask + 1))
     except Exception as e:
         keys = []
         if not skip_exception:
