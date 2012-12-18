@@ -130,6 +130,7 @@ if __name__ == '__main__':
     while 1:
         got_new_files = False
         files = glob.glob(os.path.join(c.bview_dir, 'bview.*.gz'))
+        routing_db.set('is_importing', 1)
         while len(files) > 0:
             files = sorted(files)
             f = files.pop()
@@ -149,6 +150,7 @@ if __name__ == '__main__':
             os.unlink(path_output_bviewfile)
             os.rename(f, os.path.join(c.raw_data, c.bview_dir, 'old', os.path.basename(f)))
             files = glob.glob(os.path.join(c.bview_dir, 'bview.*.gz'))
+        routing_db.delete('is_importing')
         if not got_new_files:
             publisher.info('All the files availables have been imported...')
             time.sleep(3600)
