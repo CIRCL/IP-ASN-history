@@ -73,7 +73,10 @@ def downloadURL(url, filename):
     """
     path_temp_bviewfile = os.path.join(c.raw_data, c.bview_dir, 'tmp', filename)
     path_bviewfile = os.path.join(c.raw_data, c.bview_dir, filename)
-    f = urllib.urlopen(url)
+    try:
+        f = urllib.urlopen(url)
+    except:
+        return False
     if f.getcode() != 200:
         publisher.warning('{} unavailable, code: {}'.format(url, f.getcode()))
         return False
