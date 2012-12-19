@@ -92,6 +92,10 @@ def run(announce_date = None):
     p = routing_db.pipeline(False)
     if announce_date is None:
         announce_date = default_announce_date
+    elif not routing_db.sismember('imported_dates', announce_date):
+        announce_date = default_announce_date
+        if not skip_exception:
+            raise Exception("unknown date")
     [p.hget(k, announce_date) for k in keys]
     return p.execute()
 
