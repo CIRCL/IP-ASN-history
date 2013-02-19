@@ -43,6 +43,7 @@ from dateutil.parser import parse
 import urllib
 import argparse
 import time
+import socket
 
 from pubsublogger import publisher
 import constraints as c
@@ -126,6 +127,7 @@ if __name__ == '__main__':
     check_dirs()
     publisher.channel = 'bviewfetch'
     publisher.use_tcp_socket = False
+    socket.setdefaulttimeout(30)
 
     parser = argparse.ArgumentParser(description='Fetch all the bview files of an interval.')
     parser.add_argument("-f", "--firstdate", required=True, type=str,
