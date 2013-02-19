@@ -118,6 +118,7 @@ def to_download():
         else:
             url = base_url_old.format(year_month = cur_day.strftime("%Y.%m"),
                     file_day = cur_day.strftime("%Y%m%d"))
+            cur_day += one_day
         url_list.append((fname, url))
     return sorted(url_list, key=lambda tup: tup[0], reverse=True)
 
