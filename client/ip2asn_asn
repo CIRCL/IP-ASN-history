@@ -10,7 +10,7 @@
 import argparse
 import sys
 
-from ip_asn_history import api as ip2asn
+import ip_asn_history as ip2asn
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -36,9 +36,8 @@ if __name__ == '__main__':
             ip, date = splitted
         else:
             ip = line
-        ip2asn.prepare_keys(ip)
+        asn = ip2asn.asn(ip, date)
         if date is None:
             date = ip2asn.default_announce_date
-        asn = ip2asn.asn(date)
         if asn is not None:
             args.outfile.write('{} {} {}\n'.format(ip, asn, date))

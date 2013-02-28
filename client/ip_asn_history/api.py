@@ -1,12 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Usage: cat <file> | python client.py
-# Example line of the input file: 127.0.0.1 20130101
-# Note: the last parameter (the day) is optional,
-#       the default value is the last imported day
-# The output of the script is: 127.0.0.1 3303 20130101
-
 import redis
 import itertools
 import sys
@@ -23,13 +17,11 @@ redis_db = 0
 
 skip_exception = True
 
-ready = False
-default_announce_date = None
-
-routing_db = None
-keys = []
-
-netmasks = [ [128, 0, 0, 0],
+__default_announce_date = None
+__number_of_days = -1
+__routing_db = None
+__keys = []
+__netmasks = [ [128, 0, 0, 0],
              [192, 0, 0, 0],
              [224, 0, 0, 0],
              [240, 0, 0, 0],
@@ -61,66 +53,73 @@ netmasks = [ [128, 0, 0, 0],
              [255, 255, 255, 252]]
 
 
-def prepare():
-    global routing_db
-    global ready
-    global default_announce_date
+def __prepare():
+    global __routing_db
     if use_unix_socket:
-        routing_db = redis.Redis(unix_socket_path='/tmp/redis.sock', db=redis_db)
+        __routing_db = redis.Redis(unix_socket_path='/tmp/redis.sock', db=redis_db)
     else:
-        routing_db = redis.Redis(host = hostname, port=port, db=redis_db)
-    default_announce_date = sorted(routing_db.smembers('imported_dates'),
-            reverse = True)[0]
-    ready = True
+        __routing_db = redis.Redis(host = hostname, port=port, db=redis_db)
+    __update_default_announce_date()
 
-def prepare_keys(ip):
-    global keys
-    if not ready:
-        prepare()
+def __update_default_announce_date():
+    global __default_announce_date
+    global __number_of_days
+    new_number_of_days = __routing_db.scard('imported_dates')
+    if new_number_of_days != __number_of_days:
+        __number_of_days = new_number_of_days
+        dates = sorted(__routing_db.smembers('imported_dates'), reverse=True)
+        if len(dates) > 0:
+            __default_announce_date = dates[0]
+
+def __prepare_keys(ip):
+    global __keys
     try:
-        keys = [ip +'/32']
+        __keys = [ip +'/32']
         ip_split = [int(digit) for digit in ip.split('.')]
         for mask in reversed(list(range(30))):
-            tmpip = [str(a & b) for a, b in itertools.izip(ip_split, netmasks[mask])]
-            keys.append('.'.join(tmpip) + '/' + str(mask + 1))
+            tmpip = [str(a & b) for a, b in
+                    itertools.izip(ip_split, __netmasks[mask])]
+            __keys.append('.'.join(tmpip) + '/' + str(mask + 1))
     except Exception as e:
-        keys = []
+        __keys = []
         if not skip_exception:
             raise e
 
-def run(announce_date = None):
+def __run(ip, announce_date = None):
     if announce_date is None:
-        announce_date = default_announce_date
-    elif not routing_db.sismember('imported_dates', announce_date):
-        dates = routing_db.smembers('imported_dates')
+        __update_default_announce_date()
+        announce_date = __default_announce_date
+    elif not __routing_db.sismember('imported_dates', announce_date):
+        dates = __routing_db.smembers('imported_dates')
         try:
             announce_date = min(enumerate(dates),
                     key=lambda x: abs(int(x[1])-int(announce_date)))[1]
         except:
-            announce_date = default_announce_date
+            announce_date = __default_announce_date
         if not skip_exception:
             raise Exception("unknown date")
-    p = routing_db.pipeline(False)
-    [p.hget(k, announce_date) for k in keys]
+    __prepare_keys(ip)
+    p = __routing_db.pipeline(False)
+    [p.hget(k, announce_date) for k in __keys]
     return p.execute()
 
-def asn(announce_date = None):
-    assignations = run(announce_date)
+def asn(ip, announce_date = None):
+    assignations = __run(ip, announce_date)
     return next((assign for assign in assignations
         if assign is not None), None)
 
-def date_asn_block(announce_date = None):
-    assignations = run(announce_date)
+def date_asn_block(ip, announce_date = None):
+    assignations = __run(ip, announce_date)
     pos = next((i for i, j in enumerate(assignations) if j is not None), None)
     if pos is not None:
-        block = keys[pos]
+        block = __keys[pos]
         if block != '0.0.0.0/0':
             asn = assignations[pos]
             return announce_date, asn, block
     return None
 
-def history():
-    all_dates = sorted(routing_db.smembers('imported_dates'), reverse = True)
+def history(ip):
+    all_dates = sorted(__routing_db.smembers('imported_dates'), reverse = True)
     for date in all_dates:
-        yield date_asn_block(date)
+        yield date_asn_block(ip, date)
 
