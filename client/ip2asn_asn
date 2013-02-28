@@ -38,6 +38,6 @@ if __name__ == '__main__':
             ip = line
         asn = ip2asn.asn(ip, date)
         if date is None:
-            date = ip2asn.default_announce_date
+            date = ip2asn.current_announce_date
         if asn is not None:
             args.outfile.write('{} {} {}\n'.format(ip, asn, date))

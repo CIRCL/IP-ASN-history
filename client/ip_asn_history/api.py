@@ -17,6 +17,7 @@ redis_db = 0
 
 skip_exception = True
 
+current_announce_date = None
 __default_announce_date = None
 __number_of_days = -1
 __routing_db = None
@@ -86,21 +87,24 @@ def __prepare_keys(ip):
             raise e
 
 def __run(ip, announce_date = None):
+    global current_announce_date
     if announce_date is None:
         __update_default_announce_date()
-        announce_date = __default_announce_date
+        current_announce_date = __default_announce_date
     elif not __routing_db.sismember('imported_dates', announce_date):
         dates = __routing_db.smembers('imported_dates')
         try:
-            announce_date = min(enumerate(dates),
+            current_announce_date = min(enumerate(dates),
                     key=lambda x: abs(int(x[1])-int(announce_date)))[1]
         except:
-            announce_date = __default_announce_date
+            current_announce_date = __default_announce_date
         if not skip_exception:
             raise Exception("unknown date")
+    else:
+        current_announce_date = announce_date
     __prepare_keys(ip)
     p = __routing_db.pipeline(False)
-    [p.hget(k, announce_date) for k in __keys]
+    [p.hget(k, current_announce_date) for k in __keys]
     return p.execute()
 
 def asn(ip, announce_date = None):
@@ -115,7 +119,7 @@ def date_asn_block(ip, announce_date = None):
         block = __keys[pos]
         if block != '0.0.0.0/0':
             asn = assignations[pos]
-            return announce_date, asn, block
+            return current_announce_date, asn, block
     return None
 
 def history(ip):
