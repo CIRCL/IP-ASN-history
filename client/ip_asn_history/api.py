@@ -86,6 +86,9 @@ def __prepare_keys(ip):
         if not skip_exception:
             raise e
 
+def get_current_date():
+    return current_announce_date
+
 def __run(ip, announce_date = None):
     global current_announce_date
     if announce_date is None:
