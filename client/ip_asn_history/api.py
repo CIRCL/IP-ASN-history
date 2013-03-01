@@ -87,6 +87,11 @@ def __prepare_keys(ip):
             raise e
 
 def get_current_date():
+    """
+        Return the date the query has been using.
+
+        :rtype: String, date, Format: YYYY-MM-DD
+    """
     return __current_announce_date
 
 def __run(ip, announce_date = None):
@@ -118,7 +123,7 @@ def asn(ip, announce_date = None):
         :param ip: IP address to search for
         :param announce_date: Date of the announcement
 
-        :rtype: integer, ASN
+        :rtype: String, ASN.
 
     """
     assignations = __run(ip, announce_date)
@@ -132,7 +137,11 @@ def date_asn_block(ip, announce_date = None):
         :param ip: IP address to search for
         :param announce_date: Date of the announcement
 
-        :rtype: tuple: announce_date, asn, block
+        :rtype: tuple
+
+            .. code-block:: python
+
+                (announce_date, asn, block)
 
         .. note::
 
