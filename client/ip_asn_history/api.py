@@ -17,7 +17,7 @@ redis_db = 0
 
 skip_exception = True
 
-current_announce_date = None
+__current_announce_date = None
 __default_announce_date = None
 __number_of_days = -1
 __routing_db = None
@@ -87,45 +87,77 @@ def __prepare_keys(ip):
             raise e
 
 def get_current_date():
-    return current_announce_date
+    return __current_announce_date
 
 def __run(ip, announce_date = None):
-    global current_announce_date
+    global __current_announce_date
     if announce_date is None:
         __update_default_announce_date()
-        current_announce_date = __default_announce_date
+        __current_announce_date = __default_announce_date
     elif not __routing_db.sismember('imported_dates', announce_date):
         dates = __routing_db.smembers('imported_dates')
         try:
-            current_announce_date = min(enumerate(dates),
+            __current_announce_date = min(enumerate(dates),
                     key=lambda x: abs(int(x[1])-int(announce_date)))[1]
         except:
-            current_announce_date = __default_announce_date
+            __current_announce_date = __default_announce_date
         if not skip_exception:
             raise Exception("unknown date")
     else:
-        current_announce_date = announce_date
+        __current_announce_date = announce_date
     __prepare_keys(ip)
     p = __routing_db.pipeline(False)
-    [p.hget(k, current_announce_date) for k in __keys]
+    [p.hget(k, __current_announce_date) for k in __keys]
     return p.execute()
 
 def asn(ip, announce_date = None):
+    """
+        Give an IP, maybe a date, get the ASN.
+        This is the fastest command.
+
+        :param ip: IP address to search for
+        :param announce_date: Date of the announcement
+
+        :rtype: integer, ASN
+
+    """
     assignations = __run(ip, announce_date)
     return next((assign for assign in assignations
         if assign is not None), None)
 
 def date_asn_block(ip, announce_date = None):
+    """
+        Get the ASN and the IP Block announcing the IP at a specific date.
+
+        :param ip: IP address to search for
+        :param announce_date: Date of the announcement
+
+        :rtype: tuple: announce_date, asn, block
+
+        .. note::
+
+            the returned announce_date might be different of the one
+            given in parameter because some raw files are missing and we
+            don't have the information. In this case, the nearest known
+            date will be chosen,
+    """
     assignations = __run(ip, announce_date)
     pos = next((i for i, j in enumerate(assignations) if j is not None), None)
     if pos is not None:
         block = __keys[pos]
         if block != '0.0.0.0/0':
             asn = assignations[pos]
-            return current_announce_date, asn, block
+            return __current_announce_date, asn, block
     return None
 
 def history(ip):
+    """
+        Get the full history of an IP. It takes time.
+
+        :param ip: IP address to search for
+
+        :rtype: list. For each day in the database: day, asn, block
+    """
     all_dates = sorted(__routing_db.smembers('imported_dates'), reverse = True)
     for date in all_dates:
         yield date_asn_block(ip, date)
