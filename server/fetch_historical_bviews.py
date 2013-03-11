@@ -83,9 +83,13 @@ def downloadURL(url, filename):
     if f.getcode() != 200:
         publisher.warning('{} unavailable, code: {}'.format(url, f.getcode()))
         return False
-    with open(path_temp_bviewfile, 'w') as outfile:
-        outfile.write(f.read())
-    os.rename(path_temp_bviewfile, path_bviewfile)
+    try:
+        with open(path_temp_bviewfile, 'w') as outfile:
+            outfile.write(f.read())
+        os.rename(path_temp_bviewfile, path_bviewfile)
+    except:
+        os.remove(path_temp_bviewfile)
+        return False
     return True
 
 def already_downloaded(filename):
