@@ -19,25 +19,5 @@ if __name__ == '__main__':
 
     if args.debug:
         ip2asn.skip_exception = False
-    first_date = None
-    last_date = None
-    prec_asn = None
-    prec_block = None
-    for entry in ip2asn.history(ip):
-        if entry is not None:
-            date, asn, block = entry
-            if first_date is None:
-                last_date = date
-                first_date = date
-                prec_asn = asn
-                prec_block = block
-            elif prec_asn == asn and prec_block == block:
-                first_date = date
-            else:
-                print first_date, last_date, prec_asn, prec_block
-                last_date = date
-                first_date = date
-                prec_asn = asn
-                prec_block = block
-    if first_date is not None:
+    for first_date, last_date, prec_asn, prec_block in ip2asn.aggregare_history(ip):
         print first_date, last_date, prec_asn, prec_block

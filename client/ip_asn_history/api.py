@@ -159,15 +159,51 @@ def date_asn_block(ip, announce_date = None):
             return __current_announce_date, asn, block
     return None
 
-def history(ip):
+def history(ip, days_limit=None):
     """
         Get the full history of an IP. It takes time.
 
         :param ip: IP address to search for
+        :param days_limit: Max amount of days to query. (None means no limit)
 
         :rtype: list. For each day in the database: day, asn, block
     """
     all_dates = sorted(__routing_db.smembers('imported_dates'), reverse = True)
+    if days_limit is not None:
+        all_dates = all_dates[:days_limit]
     for date in all_dates:
         yield date_asn_block(ip, date)
+
+def aggregare_history(ip, days_limit=None):
+    """
+        Get the full history of an IP, aggregare the result instead of
+        returning one line per day.
+
+        :param ip: IP address to search for
+        :param days_limit: Max amount of days to query. (None means no limit)
+
+        :rtype: list. For each change: FirstDay, LastDay, ASN, Block
+    """
+    first_date = None
+    last_date = None
+    prec_asn = None
+    prec_block = None
+    for entry in history(ip, days_limit):
+        if entry is not None:
+            date, asn, block = entry
+            if first_date is None:
+                last_date = date
+                first_date = date
+                prec_asn = asn
+                prec_block = block
+            elif prec_asn == asn and prec_block == block:
+                first_date = date
+            else:
+                yield first_date, last_date, prec_asn, prec_block
+                last_date = date
+                first_date = date
+                prec_asn = asn
+                prec_block = block
+    if first_date is not None:
+        return first_date, last_date, prec_asn, prec_block
 
