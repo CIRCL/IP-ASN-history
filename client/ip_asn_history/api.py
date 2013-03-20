@@ -205,5 +205,5 @@ def aggregare_history(ip, days_limit=None):
                 prec_asn = asn
                 prec_block = block
     if first_date is not None:
-        return first_date, last_date, prec_asn, prec_block
+        yield first_date, last_date, prec_asn, prec_block
 
