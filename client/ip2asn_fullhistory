@@ -19,5 +19,5 @@ if __name__ == '__main__':
 
     if args.debug:
         ip2asn.skip_exception = False
-    for first_date, last_date, prec_asn, prec_block in ip2asn.aggregare_history(ip):
-        print first_date, last_date, prec_asn, prec_block
+    for first_date, last_date, asn, block in ip2asn.aggregare_history(ip):
+        print first_date, last_date, asn, block
