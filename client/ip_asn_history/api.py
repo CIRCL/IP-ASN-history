@@ -174,9 +174,9 @@ def history(ip, days_limit=None):
     for date in all_dates:
         yield date_asn_block(ip, date)
 
-def aggregare_history(ip, days_limit=None):
+def aggregate_history(ip, days_limit=None):
     """
-        Get the full history of an IP, aggregare the result instead of
+        Get the full history of an IP, aggregate the result instead of
         returning one line per day.
 
         :param ip: IP address to search for

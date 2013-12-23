@@ -43,8 +43,8 @@ def history(ip, days_limit = None):
     query.update({'ip': ip, 'days_limit': days_limit})
     return __prepare_request(query)
 
-def aggregare_history(ip, days_limit = None):
-    query = {'method': 'aggregare_history'}
+def aggregate_history(ip, days_limit = None):
+    query = {'method': 'aggregate_history'}
     query.update({'ip': ip, 'days_limit': days_limit})
     return __prepare_request(query)
 

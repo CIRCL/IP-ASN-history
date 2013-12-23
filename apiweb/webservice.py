@@ -24,10 +24,12 @@ import ip_asn_history
 
 
 logging = True
+
 try:
     if logging:
             from pubsublogger import publisher
             publisher.channel = 'IPASN_Web'
+            publisher.port = 6390
 except:
     logging = False
 
@@ -35,7 +37,7 @@ except:
 app = Flask(__name__)
 app.debug = True
 
-authorized_methods = ['asn', 'date_asn_block', 'history', 'aggregare_history']
+authorized_methods = ['asn', 'date_asn_block', 'history', 'aggregate_history']
 
 class SetEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -84,7 +86,7 @@ def __entry_point():
         # unknown method, the method is authorized, but does not exists...
         __query_logging(ip, ua, method, level = 'warning')
         return json.dumps({'error': 'Unknown method.'})
-    if request.get('ip') is None:
+    if request.json.get('ip') is None:
         __query_logging(ip, ua, method, level = 'warning')
         return json.dumps({'error': 'No IP provided, not going to work.'})
     try:
@@ -93,7 +95,7 @@ def __entry_point():
                 request.json.get('announce_date'), request.json.get('days_limit'))
         return result
     except:
-        __query_logging(ip, ua, method, level = 'error')
+        __query_logging(ip, ua, method, request.json.get('ip'), level = 'error')
         return json.dumps({'error': 'Something went wrong.'})
 
 def asn(request):
@@ -113,14 +115,16 @@ def history(request):
     ip = request.get('ip')
     if ip is None:
          return json.dumps({})
-    return json.dumps(ip_asn_history.history(ip, request.get('days_limit')))
+    return json.dumps([(line[0], line[1], line[2]) for line in
+        ip_asn_history.history(ip, request.get('days_limit')) if line is not None])
 
-def aggregare_history(request):
+def aggregate_history(request):
     ip = request.get('ip')
     if ip is None:
          return json.dumps({})
-    return json.dumps(ip_asn_history.aggregare_history(ip,
-        request.get('days_limit')))
+    return json.dumps([(line[0], line[1], line[2], line[3])
+        for line in ip_asn_history.aggregate_history(ip, request.get('days_limit'))
+        if line is not None])
 
 if __name__ == '__main__':
     app.run()
