@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(
     name='ip_asn_history',
-    version='0.1',
+    version='1.0.1',
     description='API to access an IP-ASN-history instance.',
     url='https://github.com/CIRCL/IP-ASN-history',
     author='Raphaël Vinot',

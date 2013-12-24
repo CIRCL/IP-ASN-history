@@ -9,7 +9,7 @@ except ImportError:
 
 setup(
     name='ipasn_web',
-    version='1.0',
+    version='1.0.1',
     description='Library to access the IP ASN History REST API.',
     url='https://github.com/CIRCL/IP-ASN-history',
     author='Raphaël Vinot',
