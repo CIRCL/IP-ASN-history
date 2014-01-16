@@ -12,7 +12,7 @@ setup(
     author_email='raphael.vinot@circl.lu',
     maintainer='Raphaël Vinot',
     packages=['ipasn', 'ipasn.redis'],
-    scripts = ['bin/ip2asn', 'bin/ip2asn-fullhistory'],
+    scripts = ['bin/ipasn_redis', 'bin/ipasn-fullhistory_redis'],
     classifiers=[
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Development Status :: 5 - Production/Stable',
