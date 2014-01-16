@@ -35,7 +35,7 @@ except:
 
 
 app = Flask(__name__)
-app.debug = True
+app.debug = False
 
 authorized_methods = ['asn', 'date_asn_block', 'history', 'aggregate_history']
 
@@ -52,7 +52,7 @@ def __csv2string(data):
     return si.getvalue().strip('\r\n');
 
 
-def __query_logging(ip, user_agent, method, q_ip, announce_date=None,
+def __query_logging(ip, user_agent, method, q_ip=None, announce_date=None,
         days_limit=None, level=None):
     if level == 'warning':
         publisher.warning(__csv2string([ip, user_agent, method, q_ip,

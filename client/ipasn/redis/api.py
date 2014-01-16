@@ -9,10 +9,10 @@ if  sys.version_info[0] == 3:
     # itertools.izip does not exists in python 3 and is much faster in python 2
     itertools.izip = zip
 
-use_unix_socket = True
+use_unix_socket = False
 
 hostname = '127.0.0.1'
-port = 6379
+port = 6382
 redis_db = 0
 
 skip_exception = True

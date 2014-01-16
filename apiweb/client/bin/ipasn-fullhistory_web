@@ -3,7 +3,6 @@
 
 import argparse
 
-import ip_asn_history as ip2asn
 
 
 if __name__ == '__main__':
@@ -11,13 +10,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Get all the assignations of an IP.')
     parser.add_argument("-i", "--ip", required=True, type=str,
             help='IP address [127.0.0.1].')
-    parser.add_argument("-d", "--debug", action="store_true",
-            help='Enable debug mode (raise an exception if an IP is invalid).')
     args = parser.parse_args()
 
     ip = args.ip.strip()
+    import ipasn.web as ipasn
 
-    if args.debug:
-        ip2asn.skip_exception = False
-    for first_date, last_date, asn, block in ip2asn.aggregare_history(ip):
+    for first_date, last_date, asn, block in ipasn.aggregate_history(ip):
         print first_date, last_date, asn, block

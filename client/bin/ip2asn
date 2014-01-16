@@ -10,7 +10,6 @@
 import argparse
 import sys
 
-import ip_asn_history as ip2asn
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -22,8 +21,10 @@ if __name__ == '__main__':
             help='Enable debug mode (raise an exception if an IP is invalid).')
     args = parser.parse_args()
 
+    import ipasn.redis as ipasn
+
     if args.debug:
-        ip2asn.skip_exception = False
+        ipasn.skip_exception = False
 
     for line in args.infile:
         line = line.strip()
@@ -36,8 +37,8 @@ if __name__ == '__main__':
             ip, date = splitted
         else:
             ip = line
-        asn = ip2asn.asn(ip, date)
+        asn = ipasn.asn(ip, date)
         if date is None:
-            date = ip2asn.get_current_date()
+            date = ipasn.get_current_date()
         if asn is not None:
             args.outfile.write('{} {} {}\n'.format(ip, asn, date))

@@ -23,11 +23,6 @@ def __prepare_request(query):
     r = requests.post(url, data=json.dumps(query), headers=headers)
     return r.json()
 
-def ip_lookup(ip, days_limit = None):
-    query = {'method': 'ip_lookup'}
-    query.update({'ip': ip, 'days_limit': days_limit})
-    return __prepare_request(query)
-
 def asn(ip, announce_date = None):
     query = {'method': 'asn'}
     query.update({'ip': ip, 'announce_date': announce_date})
