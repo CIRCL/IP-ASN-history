@@ -11,7 +11,7 @@ setup(
     author='Raphaël Vinot',
     author_email='raphael.vinot@circl.lu',
     maintainer='Raphaël Vinot',
-    packages=['ipasn', 'ipasn.web'],
+    packages=['ipasn_web'],
     scripts = ['bin/ipasn_web', 'bin/ipasn-fullhistory_web'],
     long_description=open('README.md').read(),
     classifiers=[

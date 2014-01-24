@@ -15,7 +15,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     ip = args.ip.strip()
-    import ipasn.redis as ipasn
+    import ipasn_redis as ipasn
 
     if args.debug:
         ipasn.skip_exception = False

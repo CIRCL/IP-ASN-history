@@ -19,7 +19,7 @@ if __name__ == '__main__':
             default=sys.stdout)
     args = parser.parse_args()
 
-    import ipasn.web as ipasn
+    import ipasn_web as ipasn
 
     for line in args.infile:
         line = line.strip()

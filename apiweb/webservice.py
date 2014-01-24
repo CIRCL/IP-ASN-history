@@ -20,7 +20,7 @@ from flask import Flask, json, request
 import StringIO
 import csv
 
-import ip_asn_history
+import ipasn_redis as ipasn
 
 
 logging = True
@@ -102,13 +102,13 @@ def asn(request):
     ip = request.get('ip')
     if ip is None:
          return json.dumps({})
-    return json.dumps(ip_asn_history.asn(ip, request.get('announce_date')))
+    return json.dumps(ipasn.asn(ip, request.get('announce_date')))
 
 def date_asn_block(request):
     ip = request.get('ip')
     if ip is None:
          return json.dumps({})
-    return json.dumps(ip_asn_history.date_asn_block(ip,
+    return json.dumps(ipasn.date_asn_block(ip,
         request.get('announce_date')))
 
 def history(request):
@@ -116,14 +116,14 @@ def history(request):
     if ip is None:
          return json.dumps({})
     return json.dumps([(line[0], line[1], line[2]) for line in
-        ip_asn_history.history(ip, request.get('days_limit') or 30) if line is not None])
+        ipasn.history(ip, request.get('days_limit') or 30) if line is not None])
 
 def aggregate_history(request):
     ip = request.get('ip')
     if ip is None:
          return json.dumps({})
     return json.dumps([(line[0], line[1], line[2], line[3])
-        for line in ip_asn_history.aggregate_history(ip, request.get('days_limit') or 30)
+        for line in ipasn.aggregate_history(ip, request.get('days_limit') or 30)
         if line is not None])
 
 if __name__ == '__main__':

@@ -11,7 +11,7 @@ setup(
     author='Raphaël Vinot',
     author_email='raphael.vinot@circl.lu',
     maintainer='Raphaël Vinot',
-    packages=['ipasn', 'ipasn.redis'],
+    packages=['ipasn_redis'],
     scripts = ['bin/ipasn_redis', 'bin/ipasn-fullhistory_redis'],
     classifiers=[
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',

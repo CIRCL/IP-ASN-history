@@ -13,7 +13,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     ip = args.ip.strip()
-    import ipasn.web as ipasn
+    import ipasn_web as ipasn
 
     for first_date, last_date, asn, block in ipasn.aggregate_history(ip):
         print first_date, last_date, asn, block
