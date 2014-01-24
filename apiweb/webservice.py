@@ -21,15 +21,16 @@ import StringIO
 import csv
 
 import ipasn_redis as ipasn
-
+ipasn.hostname='127.0.0.1'
+ipasn.port=6390
 
 logging = True
 
 try:
     if logging:
-            from pubsublogger import publisher
-            publisher.channel = 'IPASN_Web'
-            publisher.port = 6390
+        from pubsublogger import publisher
+        publisher.channel = 'IPASN_Web'
+        publisher.port = 6390
 except:
     logging = False
 
@@ -94,7 +95,7 @@ def __entry_point():
         __query_logging(ip, ua, method, request.json.get('ip'),
                 request.json.get('announce_date'), request.json.get('days_limit'))
         return result
-    except:
+    except Exception as e:
         __query_logging(ip, ua, method, request.json.get('ip'), level = 'error')
         return json.dumps({'error': 'Something went wrong.'})
 

@@ -12,7 +12,7 @@ if  sys.version_info[0] == 3:
 use_unix_socket = False
 
 hostname = '127.0.0.1'
-port = 6382
+port = 6390
 redis_db = 0
 
 skip_exception = True
@@ -54,17 +54,20 @@ __netmasks = [ [128, 0, 0, 0],
              [255, 255, 255, 252]]
 
 
-def __prepare():
+def get_db():
     global __routing_db
-    if use_unix_socket:
-        __routing_db = redis.Redis(unix_socket_path='/tmp/redis.sock', db=redis_db)
-    else:
-        __routing_db = redis.Redis(host = hostname, port=port, db=redis_db)
-    __update_default_announce_date()
+    if __routing_db is None or not __routing_db.ping():
+        if use_unix_socket:
+            __routing_db = redis.Redis(unix_socket_path='/tmp/redis.sock', db=redis_db)
+        else:
+            __routing_db = redis.Redis(host=hostname, port=port, db=redis_db)
+    return __routing_db
 
 def __update_default_announce_date():
     global __default_announce_date
     global __number_of_days
+    global __routing_db
+    __routing_db = get_db()
     new_number_of_days = __routing_db.scard('imported_dates')
     if new_number_of_days != __number_of_days:
         __number_of_days = new_number_of_days
@@ -94,26 +97,29 @@ def get_current_date():
     """
     return __current_announce_date
 
-def __run(ip, announce_date = None):
-    global __current_announce_date
+def get_announce_date(announce_date):
     if announce_date is None:
         __update_default_announce_date()
-        __current_announce_date = __default_announce_date
+        announce_date = __default_announce_date
     elif not __routing_db.sismember('imported_dates', announce_date):
         dates = __routing_db.smembers('imported_dates')
         try:
-            __current_announce_date = min(enumerate(dates),
+            announce_date = min(enumerate(dates),
                     key=lambda x: abs(int(x[1])-int(announce_date)))[1]
         except:
-            __current_announce_date = __default_announce_date
+            announce_date = __default_announce_date
         if not skip_exception:
             raise Exception("unknown date")
-    else:
-        __current_announce_date = announce_date
+    return announce_date
+
+def __run(ip, announce_date = None):
+    global __routing_db
+    __routing_db = get_db()
+    announce_date = get_announce_date(announce_date)
     __prepare_keys(ip)
     p = __routing_db.pipeline(False)
-    [p.hget(k, __current_announce_date) for k in __keys]
-    return p.execute()
+    [p.hget(k, announce_date) for k in __keys]
+    return p.execute(), announce_date
 
 def asn(ip, announce_date = None):
     """
@@ -126,9 +132,9 @@ def asn(ip, announce_date = None):
         :rtype: String, ASN.
 
     """
-    assignations = __run(ip, announce_date)
+    assignations, announce_date = __run(ip, announce_date)
     return next((assign for assign in assignations
-        if assign is not None), None)
+        if assign is not None), None), announce_date
 
 def date_asn_block(ip, announce_date = None):
     """
@@ -150,13 +156,13 @@ def date_asn_block(ip, announce_date = None):
             don't have the information. In this case, the nearest known
             date will be chosen,
     """
-    assignations = __run(ip, announce_date)
+    assignations, announce_date = __run(ip, announce_date)
     pos = next((i for i, j in enumerate(assignations) if j is not None), None)
     if pos is not None:
         block = __keys[pos]
         if block != '0.0.0.0/0':
             asn = assignations[pos]
-            return __current_announce_date, asn, block
+            return announce_date, asn, block
     return None
 
 def history(ip, days_limit=None):
@@ -168,7 +174,7 @@ def history(ip, days_limit=None):
 
         :rtype: list. For each day in the database: day, asn, block
     """
-    all_dates = sorted(__routing_db.smembers('imported_dates'), reverse = True)
+    all_dates = sorted(get_db().smembers('imported_dates'), reverse = True)
     if days_limit is not None:
         all_dates = all_dates[:days_limit]
     for date in all_dates:
