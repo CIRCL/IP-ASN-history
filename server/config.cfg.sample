@@ -1,0 +1,17 @@
+[General]
+# Can be any of the sections bellow
+backend = LevelDB
+
+[RedisSock]
+sock = /tmp/redis.sock
+
+[RedisTCP]
+hostname = 127.0.0.1
+port = 6399
+db = 0
+
+[LevelDB]
+hostname = 127.0.0.1
+port = 6399
+db = 0
+

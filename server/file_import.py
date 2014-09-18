@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """
@@ -8,21 +8,21 @@
 
     Service pushing the routing information.
 
-    This service runs on a file and extract from each RI block the network and the ASN
-    announcing this block. Both of them are pushed into the redis database.
+    This service runs on a file and extract from each RI block the network and
+    the ASN announcing this block. Both of them are pushed into the redis
+    database.
 
 """
 import os
-import redis
 import re
 
 from pubsublogger import publisher
 import argparse
-
-routing_db = redis.Redis(unix_socket_path='/tmp/redis.sock')
+from backend import get_redis_connector
 
 
 def db_import(filename, day):
+    routing_db = get_redis_connector()
     with open(filename, 'r') as f:
         entry = ''
         pipeline = routing_db.pipeline()
@@ -37,24 +37,24 @@ def db_import(filename, day):
                     # RIPE-NCC-RIS BGP IPv6 Anchor Prefix @RRC00
                     # RIPE-NCC-RIS BGP Anchor Prefix @ rrc00 - RIPE NCC
                     if block in ['2001:7fb:ff00::/48', '84.205.80.0/24',
-                            '2001:7fb:fe00::/48', '84.205.64.0/24']:
+                                 '2001:7fb:fe00::/48', '84.205.64.0/24']:
                         asn = 12654
                     else:
                         asn = int(parsed[1].split()[-1].strip())
                     pipeline.hset(block, day, asn)
                 except:
-                    #FIXME: check the cause of the exception
+                    # FIXME: check the cause of the exception
                     publisher.warning(entry)
                 entry = ''
-                if i%10000 == 0:
+                if i % 10000 == 0:
                     pipeline.execute()
                     pipeline = routing_db.pipeline()
-            else :
+            else:
                 # append the line to the current block.
                 entry += line
         pipeline.execute()
-        publisher.info('{f} finished, {nb} entries impported.'.\
-                format(f=filename, nb = i))
+        publisher.info('{f} finished, {nb} entries impported.'.format(
+            f=filename, nb=i))
 
 if __name__ == '__main__':
 
@@ -63,9 +63,9 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Parse a bview file.')
     parser.add_argument("-f", "--filename", required=True, type=str,
-            help='Name of the file.')
+                        help='Name of the file.')
     parser.add_argument("-d", "--day", required=True, type=str,
-            help='Day of the dump: YYYYMMDD')
+                        help='Day of the dump: YYYYMMDD')
     args = parser.parse_args()
 
     day = int(args.day)

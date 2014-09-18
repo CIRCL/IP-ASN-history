@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """
@@ -56,10 +56,9 @@ def fsplit(file_to_split):
                 # Write the new file
                 open(new_file, 'w').write(copy)
             splitted_files.append(new_file)
-            number +=1
+            number += 1
 
             # End of file
             if len(s) == 0:
                 break
     return splitted_files
-

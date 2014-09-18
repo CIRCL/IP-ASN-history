@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """
@@ -55,6 +55,7 @@ hours = ['0000', '0800', '1600']
 path_temp_bviewfile = os.path.join(c.bview_dir, 'tmp', 'bview.gz')
 current_date = None
 
+
 def checkURL(url):
     """
         Check if the URL exists by getting the header of the response.
@@ -64,8 +65,11 @@ def checkURL(url):
     h.request('HEAD', p[2])
     reply = h.getresponse()
     h.close()
-    if reply.status == 200 : return 1
-    else: return 0
+    if reply.status == 200:
+        return 1
+    else:
+        return 0
+
 
 def downloadURL(url):
     """
@@ -75,6 +79,7 @@ def downloadURL(url):
     """
     urllib.urlretrieve(url, os.path.join(c.raw_data, path_temp_bviewfile))
     os.rename(os.path.join(c.raw_data, path_temp_bviewfile), c.path_bviewfile)
+
 
 def already_downloaded(date, hour):
     """
@@ -102,8 +107,8 @@ if __name__ == '__main__':
             file_day = current_date.strftime("%Y%m%d")
 
             for hour in reversed(hours):
-                url = base_url.format(year_month = year_month,
-                        file_day = file_day, hour = hour)
+                url = base_url.format(year_month=year_month,
+                                      file_day=file_day, hour=hour)
                 if checkURL(url):
                     if not already_downloaded(file_day, hour):
                         publisher.info("New bview file found: " + url)

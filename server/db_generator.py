@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import constraints as c
@@ -11,8 +11,6 @@ import time
 import redis
 import glob
 import datetime
-
-
 
 import file_splitter
 from pubsublogger import publisher
@@ -34,16 +32,18 @@ index_asns_details = 'asns_details'
 
 imported_day = 0
 
-def service_start(service = None, param = None):
+
+def service_start(service=None, param=None):
     """
         Launch a Process, return his pid
     """
-    if service is not None :
+    if service is not None:
         to_run = ["python", service]
         if param is not None:
             to_run += param
         return subprocess.Popen(to_run)
     return False
+
 
 def update_running_pids(old_procs):
     """
@@ -57,11 +57,12 @@ def update_running_pids(old_procs):
         else:
             try:
                 publisher.debug(str(proc.pid) + ' is gone')
-                os.kill (proc.pid, signal.SIGKILL)
+                os.kill(proc.pid, signal.SIGKILL)
             except:
                 # the process is just already gone
                 pass
     return new_procs
+
 
 def check_pid(pid):
     """
@@ -74,19 +75,22 @@ def check_pid(pid):
     else:
         return True
 
+
 def run_splitted_processing(max_simultaneous_processes, process_name,
-        filenames):
+                            filenames):
     """
-        Run processes which push the routing dump of the RIPE in a redis database.
-        The dump has been splitted in multiple files and each process run on one
-        of this files.
+        Run processes which push the routing dump of the RIPE in a redis
+        database.
+        The dump has been splitted in multiple files and each process run
+        on one of this files.
     """
     pids = []
     while len(filenames) > 0:
         while len(filenames) > 0 and len(pids) < max_simultaneous_processes:
             filename = filenames.pop()
-            pids.append(service_start(service = process_name,
-                param = ['-f', filename, '-d', imported_day]))
+            pids.append(service_start(service=process_name,
+                                      param=['-f', filename, '-d',
+                                             imported_day]))
         while len(pids) == max_simultaneous_processes:
             time.sleep(sleep_timer)
             pids = update_running_pids(pids)
@@ -95,12 +99,13 @@ def run_splitted_processing(max_simultaneous_processes, process_name,
         time.sleep(sleep_timer)
         pids = update_running_pids(pids)
 
+
 def prepare_bview_file(filename):
     publisher.info('Start converting binary bview file in plain text...')
     # create the plain text dump from the binary dump
     with open(path_output_bviewfile, 'w') as output:
         nul_f = open(os.devnull, 'w')
-        p_bgp = Popen([bgpdump , filename], stdout=PIPE, stderr = nul_f)
+        p_bgp = Popen([bgpdump, filename], stdout=PIPE, stderr=nul_f)
         for line in p_bgp.stdout:
             output.write(line)
         nul_f.close()
@@ -108,6 +113,7 @@ def prepare_bview_file(filename):
 
     # Split the plain text file
     return file_splitter.fsplit(path_output_bviewfile)
+
 
 def import_assignations(files):
     publisher.info('Start pushing all routes...')
@@ -144,11 +150,13 @@ if __name__ == '__main__':
             files = prepare_bview_file(f)
             import_assignations(files)
             routing_db.sadd('imported_dates', imported_day)
-            publisher.info('Done with ' + f + '. Time: ' + str(datetime.datetime.now() - time_begin))
+            publisher.info('Done with {}. Time: {}'.format(
+                f, datetime.datetime.now() - time_begin))
 
             # Remove the plain text file and move the binary
             os.unlink(path_output_bviewfile)
-            os.rename(f, os.path.join(c.raw_data, c.bview_dir, 'old', os.path.basename(f)))
+            os.rename(f, os.path.join(c.raw_data, c.bview_dir, 'old',
+                                      os.path.basename(f)))
             files = glob.glob(os.path.join(c.bview_dir, 'bview.*.gz'))
         routing_db.delete('is_importing')
         if not got_new_files:

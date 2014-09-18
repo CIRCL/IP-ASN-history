@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """
@@ -57,6 +57,7 @@ base_url = 'http://data.ris.ripe.net/rrc00/{year_month}/bview.{file_day}.0000.gz
 base_url_old = 'http://data.ris.ripe.net/rrc00/{year_month}/bview.{file_day}.2359.gz'
 filename = 'bview.{day}.gz'
 
+
 def check_dirs():
     main_dir = c.bview_dir
     tmp_dir = os.path.join(c.bview_dir, 'tmp')
@@ -67,6 +68,7 @@ def check_dirs():
         os.mkdir(tmp_dir)
     if not os.path.exists(old_dir):
         os.mkdir(old_dir)
+
 
 def downloadURL(url, filename):
     """
@@ -92,6 +94,7 @@ def downloadURL(url, filename):
         return False
     return True
 
+
 def already_downloaded(filename):
     """
         Verify that the file has not already been downloaded.
@@ -101,6 +104,7 @@ def already_downloaded(filename):
     if not os.path.exists(cur_file) and not os.path.exists(old_file):
         return False
     return True
+
 
 def to_download():
     """
@@ -115,17 +119,18 @@ def to_download():
     cur_day = first_day
     url_list = []
     while cur_day < last_day:
-        fname = filename.format(day = cur_day.strftime("%Y%m%d"))
+        fname = filename.format(day=cur_day.strftime("%Y%m%d"))
         if cur_day > format_change:
             cur_day += one_day
-            url = base_url.format(year_month = cur_day.strftime("%Y.%m"),
-                    file_day = cur_day.strftime("%Y%m%d"))
+            url = base_url.format(year_month=cur_day.strftime("%Y.%m"),
+                                  file_day=cur_day.strftime("%Y%m%d"))
         else:
-            url = base_url_old.format(year_month = cur_day.strftime("%Y.%m"),
-                    file_day = cur_day.strftime("%Y%m%d"))
+            url = base_url_old.format(year_month=cur_day.strftime("%Y.%m"),
+                                      file_day=cur_day.strftime("%Y%m%d"))
             cur_day += one_day
         url_list.append((fname, url))
     return sorted(url_list, key=lambda tup: tup[0], reverse=True)
+
 
 if __name__ == '__main__':
     check_dirs()
@@ -135,9 +140,9 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Fetch all the bview files of an interval.')
     parser.add_argument("-f", "--firstdate", required=True, type=str,
-            help='First date of the interval [YYYY-MM-DD].')
+                        help='First date of the interval [YYYY-MM-DD].')
     parser.add_argument("-l", "--lastdate", type=str, default=None,
-            help='Last date of the interval [YYYY-MM-DD].')
+                        help='Last date of the interval [YYYY-MM-DD].')
 
     args = parser.parse_args()
     interval_first = args.firstdate
