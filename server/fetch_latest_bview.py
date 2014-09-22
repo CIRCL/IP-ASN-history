@@ -48,6 +48,8 @@ from urlparse import urlparse
 from pubsublogger import publisher
 import constraints as c
 
+from backend import get_redis_connector
+
 
 sleep_timer = 3600
 base_url = 'http://data.ris.ripe.net/rrc00/{year_month}/bview.{file_day}.{hour}.gz'
@@ -97,6 +99,7 @@ def already_downloaded(date, hour):
 
 if __name__ == '__main__':
 
+    publisher.redis_instance = get_redis_connector()
     publisher.channel = 'bviewfetch'
 
     while 1:

@@ -58,8 +58,8 @@ def db_import(filename, day):
 
 if __name__ == '__main__':
 
+    publisher.redis_instance = get_redis_connector()
     publisher.channel = 'bviewparse'
-    publisher.use_tcp_socket = False
 
     parser = argparse.ArgumentParser(description='Parse a bview file.')
     parser.add_argument("-f", "--filename", required=True, type=str,

@@ -47,6 +47,7 @@ import socket
 
 from pubsublogger import publisher
 import constraints as c
+from backend import get_redis_connector
 
 # Format: YYYY-MM-DD
 interval_first = None
@@ -134,6 +135,7 @@ def to_download():
 
 if __name__ == '__main__':
     check_dirs()
+    publisher.redis_instance = get_redis_connector()
     publisher.channel = 'bviewfetch'
     publisher.use_tcp_socket = False
     socket.setdefaulttimeout(30)

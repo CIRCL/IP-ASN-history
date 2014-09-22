@@ -8,7 +8,7 @@ import signal
 import os
 from subprocess import Popen, PIPE
 import time
-import redis
+from backend import get_redis_connector
 import glob
 import datetime
 
@@ -16,7 +16,7 @@ import file_splitter
 from pubsublogger import publisher
 
 
-simultaneous_db_import = 10
+simultaneous_db_import = 2
 path_to_importer = os.path.join(os.curdir, 'file_import.py')
 
 path_output_bviewfile = os.path.join(c.bview_dir, 'bview')
@@ -122,13 +122,12 @@ def import_assignations(files):
 
 
 if __name__ == '__main__':
-
+    publisher.redis_instance = get_redis_connector()
     publisher.channel = 'bview'
-    publisher.use_tcp_socket = False
 
     bgpdump = os.path.join(c.raw_data, path_to_bgpdump_bin)
 
-    routing_db = redis.Redis(unix_socket_path='/tmp/redis.sock')
+    routing_db = get_redis_connector()
 
     # Wait a bit until the bview file is downloaded
     time.sleep(60)
