@@ -49,11 +49,8 @@ or your own openbgpd dump file).
 
     ```bash
     cd client
-    python ip2asn_fullhistory -i 8.8.8.8
-    20121104 15169 8.8.8.0/24
-    20121103 15169 8.8.8.0/24
-    20121102 15169 8.8.8.0/24
-    20121101 15169 8.8.8.0/24
+    python ipasn-fullhistory_redis -i 8.8.8.8
+    20141212 20141230 15169 8.8.8.0/24
     ```
 
     To install the library system-wide:
