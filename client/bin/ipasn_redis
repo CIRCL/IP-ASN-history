@@ -37,8 +37,6 @@ if __name__ == '__main__':
             ip, date = splitted
         else:
             ip = line
-        asn = ipasn.asn(ip, date)
-        if date is None:
-            date = ipasn.get_current_date()
+        (asn, rdate) = ipasn.asn(ip, date)
         if asn is not None:
-            args.outfile.write('{} {} {}\n'.format(ip, asn, date))
+            args.outfile.write('{} {} {}\n'.format(ip, asn, rdate))
