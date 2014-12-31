@@ -12,6 +12,7 @@ if  sys.version_info[0] == 3:
 use_unix_socket = False
 
 hostname = '127.0.0.1'
+unixsocketfile = '/tmp/redis.sock'
 port = 6390
 redis_db = 0
 
@@ -58,7 +59,7 @@ def get_db():
     global __routing_db
     if __routing_db is None or not __routing_db.ping():
         if use_unix_socket:
-            __routing_db = redis.Redis(unix_socket_path='/tmp/redis.sock', db=redis_db)
+            __routing_db = redis.Redis(unix_socket_path=unixsocketfile, db=redis_db)
         else:
             __routing_db = redis.Redis(host=hostname, port=port, db=redis_db)
     return __routing_db
