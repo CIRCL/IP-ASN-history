@@ -5,7 +5,7 @@ from setuptools import setup
 
 setup(
     name='ipasn-redis',
-    version='1.0',
+    version='1.1',
     description='API to access an IP-ASN-history instance via Redis.',
     url='https://github.com/CIRCL/IP-ASN-history',
     author='Raphaël Vinot',
@@ -19,7 +19,8 @@ setup(
         'Environment :: Console',
         'Intended Audience :: Science/Research',
         'Intended Audience :: Telecommunications Industry',
-        'Programming Language :: Python',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
         'Topic :: Security',
         'Topic :: Internet',
         'Topic :: System :: Networking',

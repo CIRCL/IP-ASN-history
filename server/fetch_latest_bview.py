@@ -39,12 +39,22 @@
 
 import os
 import datetime
-import urllib
+try:
+    from urllib.request import urlretrieve
+except ImportError:
+    from urllib import urlretrieve
+
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
+
+try:
+    from http.client import HTTPConnection
+except ImportError:
+    from httplib import HTTPConnection
+
 import time
-
-import httplib
-from urlparse import urlparse
-
 from pubsublogger import publisher
 import constraints as c
 
@@ -63,7 +73,7 @@ def checkURL(url):
         Check if the URL exists by getting the header of the response.
     """
     p = urlparse(url)
-    h = httplib.HTTPConnection(p[1])
+    h = HTTPConnection(p[1])
     h.request('HEAD', p[2])
     reply = h.getresponse()
     h.close()
@@ -79,7 +89,7 @@ def downloadURL(url):
         When finished, the file is moved in the real directory.
         Like this an other process will not attempt to extract an inclomplete file.
     """
-    urllib.urlretrieve(url, os.path.join(c.raw_data, path_temp_bviewfile))
+    urlretrieve(url, os.path.join(c.raw_data, path_temp_bviewfile))
     os.rename(os.path.join(c.raw_data, path_temp_bviewfile), c.path_bviewfile)
 
 

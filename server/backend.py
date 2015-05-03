@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import ConfigParser
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
 import redis
 import os
 
@@ -10,7 +13,7 @@ def get_redis_connector():
     configfile = os.path.join('config.cfg')
     if not os.path.exists(configfile):
         raise Exception('Unable to find the configuration file.')
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     config.read(configfile)
     section_name = config.get('General', 'backend')
     if not config.has_section(section_name):

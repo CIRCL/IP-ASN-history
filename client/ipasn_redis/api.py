@@ -2,12 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import redis
-import itertools
-import sys
-
-if  sys.version_info[0] == 3:
-    # itertools.izip does not exists in python 3 and is much faster in python 2
-    itertools.izip = zip
+try:
+    from itertools import izip as zip
+except ImportError:  # will be 3.x series
+    pass
 
 use_unix_socket = False
 
@@ -23,7 +21,8 @@ __default_announce_date = None
 __number_of_days = -1
 __routing_db = None
 __keys = []
-__netmasks = [ [128, 0, 0, 0],
+__netmasks = [
+             [128, 0, 0, 0],
              [192, 0, 0, 0],
              [224, 0, 0, 0],
              [240, 0, 0, 0],
@@ -64,6 +63,7 @@ def get_db():
             __routing_db = redis.Redis(host=hostname, port=port, db=redis_db)
     return __routing_db
 
+
 def __update_default_announce_date():
     global __default_announce_date
     global __number_of_days
@@ -76,19 +76,20 @@ def __update_default_announce_date():
         if len(dates) > 0:
             __default_announce_date = dates[0]
 
+
 def __prepare_keys(ip):
     global __keys
     try:
-        __keys = [ip +'/32']
+        __keys = [ip + '/32']
         ip_split = [int(digit) for digit in ip.split('.')]
         for mask in reversed(list(range(30))):
-            tmpip = [str(a & b) for a, b in
-                    itertools.izip(ip_split, __netmasks[mask])]
+            tmpip = [str(a & b) for a, b in zip(ip_split, __netmasks[mask])]
             __keys.append('.'.join(tmpip) + '/' + str(mask + 1))
     except Exception as e:
         __keys = []
         if not skip_exception:
             raise e
+
 
 def get_current_date():
     """
@@ -98,6 +99,7 @@ def get_current_date():
     """
     return __current_announce_date
 
+
 def get_announce_date(announce_date):
     if announce_date is None:
         __update_default_announce_date()
@@ -106,14 +108,15 @@ def get_announce_date(announce_date):
         dates = __routing_db.smembers('imported_dates')
         try:
             announce_date = min(enumerate(dates),
-                    key=lambda x: abs(int(x[1])-int(announce_date)))[1]
+                                key=lambda x: abs(int(x[1]) - int(announce_date)))[1]
         except:
             announce_date = __default_announce_date
         if not skip_exception:
             raise Exception("unknown date")
     return announce_date
 
-def __run(ip, announce_date = None):
+
+def __run(ip, announce_date=None):
     global __routing_db
     __routing_db = get_db()
     announce_date = get_announce_date(announce_date)
@@ -122,7 +125,8 @@ def __run(ip, announce_date = None):
     [p.hget(k, announce_date) for k in __keys]
     return p.execute(), announce_date
 
-def asn(ip, announce_date = None):
+
+def asn(ip, announce_date=None):
     """
         Give an IP, maybe a date, get the ASN.
         This is the fastest command.
@@ -134,10 +138,10 @@ def asn(ip, announce_date = None):
 
     """
     assignations, announce_date = __run(ip, announce_date)
-    return next((assign for assign in assignations
-        if assign is not None), None), announce_date
+    return next((assign for assign in assignations if assign is not None), None), announce_date
 
-def date_asn_block(ip, announce_date = None):
+
+def date_asn_block(ip, announce_date=None):
     """
         Get the ASN and the IP Block announcing the IP at a specific date.
 
@@ -166,6 +170,7 @@ def date_asn_block(ip, announce_date = None):
             return announce_date, asn, block
     return None
 
+
 def history(ip, days_limit=None):
     """
         Get the full history of an IP. It takes time.
@@ -175,11 +180,12 @@ def history(ip, days_limit=None):
 
         :rtype: list. For each day in the database: day, asn, block
     """
-    all_dates = sorted(get_db().smembers('imported_dates'), reverse = True)
+    all_dates = sorted(get_db().smembers('imported_dates'), reverse=True)
     if days_limit is not None:
         all_dates = all_dates[:days_limit]
     for date in all_dates:
         yield date_asn_block(ip, date)
+
 
 def aggregate_history(ip, days_limit=None):
     """
@@ -213,4 +219,3 @@ def aggregate_history(ip, days_limit=None):
                 prec_block = block
     if first_date is not None:
         yield first_date, last_date, prec_asn, prec_block
-

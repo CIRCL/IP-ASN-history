@@ -40,7 +40,10 @@
 import os
 import datetime
 from dateutil.parser import parse
-import urllib
+try:
+    from urllib.request import urlopen
+except ImportError:
+    from urllib import urlopen
 import argparse
 import time
 import socket
@@ -80,7 +83,7 @@ def downloadURL(url, filename):
     path_temp_bviewfile = os.path.join(c.raw_data, c.bview_dir, 'tmp', filename)
     path_bviewfile = os.path.join(c.raw_data, c.bview_dir, filename)
     try:
-        f = urllib.urlopen(url)
+        f = urlopen(url)
     except:
         return False
     if f.getcode() != 200:

@@ -12,7 +12,7 @@ setup(
     author_email='raphael.vinot@circl.lu',
     maintainer='Raphaël Vinot',
     packages=['ipasn_web'],
-    scripts = ['bin/ipasn_web', 'bin/ipasn-fullhistory_web'],
+    scripts=['bin/ipasn_web', 'bin/ipasn-fullhistory_web'],
     long_description=open('README.md').read(),
     classifiers=[
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
@@ -20,12 +20,12 @@ setup(
         'Environment :: Console',
         'Intended Audience :: Science/Research',
         'Intended Audience :: Telecommunications Industry',
-        'Programming Language :: Python',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
         'Topic :: Security',
         'Topic :: Internet',
         'Topic :: System :: Networking',
-        ],
+    ],
 
     install_requires=['requests']
-
-    )
+)

@@ -16,4 +16,4 @@ if __name__ == '__main__':
     import ipasn_web as ipasn
 
     for first_date, last_date, asn, block in ipasn.aggregate_history(ip):
-        print first_date, last_date, asn, block
+        print(first_date, last_date, asn, block)
