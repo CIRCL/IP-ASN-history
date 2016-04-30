@@ -1,23 +1,22 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import argparse
 
-
-
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Get all the assignations of an IP.')
-    parser.add_argument("-i", "--ip", required=True, type=str,
-            help='IP address [127.0.0.1].')
-    parser.add_argument("-d", "--debug", action="store_true",
-            help='Enable debug mode (raise an exception if an IP is invalid).')
+    parser.add_argument("-i", "--ip", required=True, type=str, help='IP address [127.0.0.1].')
+    parser.add_argument("-s", "--host", default='127.0.0.1', type=str, help='Port of the redis server.')
+    parser.add_argument("-p", "--port", default=6390, type=str, help='Port of the redis server.')
+    parser.add_argument("-b", "--db", default=0, type=str, help='Redis Database.')
+    parser.add_argument("-d", "--debug", action="store_true", help='Enable debug mode (raise an exception if an IP is invalid).')
     args = parser.parse_args()
 
     ip = args.ip.strip()
-    import ipasn_redis as ipasn
+    from ipasn_redis import IPASN
 
-    if args.debug:
-        ipasn.skip_exception = False
+    ipasn = IPASN(host=args.host, port=args.port, db=args.db, skip_exception=args.debug)
+
     for first_date, last_date, asn, block in ipasn.aggregate_history(ip):
         print(first_date, last_date, asn, block)
