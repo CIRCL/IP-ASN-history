@@ -69,18 +69,22 @@ Using only one TCP session while going through multiple SSH tunnels
 ===================================================================
 
 Use case:
-* redis client_s_ ---> entry point ---> destination ---> redis server
-                  <----------------- SSH -------------->
+```
+redis client ---> entry point ---> destination ---> redis server
+              <----------------- SSH -------------->
+```
 * Multiple TCP sessions
 * Very slow
 
 
 Server side:
+
 ```bash
 socat tcp4-listen:6380,reuseaddr,fork TCP:localhost:6379
 ```
 
 Client side:
+
 ```bash
 ssh <dest> -L 6381:<dest>:6380
 socat tcp4-listen:6382,reuseaddr,fork TCP:localhost:6381
